@@ -283,7 +283,7 @@
   nextBtn.addEventListener('click', () => {
     const username = usernameInput.value.trim();
     if (!selectedReward) return alert("Select Reward Before Continuing");
-    if (!username || username.length < 3) return alert("✖️ Invalid Roblox Username.");
+    if (!username || username.length < 3) return alert("✖️ Invalid Username.");
     document.getElementById('step1').style.display = 'none';
     confirmRewardImg.src = selectedRewardSrc;
     confirmUsername.textContent = username;
