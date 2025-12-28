@@ -80,30 +80,45 @@ function uploadRecording() {
 
 // Show saved MP3 files when the "Show Saved MP3 Files" button is clicked
 showSavedButton.addEventListener('click', () => {
+    console.log('Fetching saved files...');  // Log request to console
+
     fetch('/list-files')  // Endpoint to get all saved MP3 files
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch saved files');
+            }
+            return response.json();
+        })
         .then(files => {
+            console.log('Fetched saved files:', files);  // Log fetched files to console
             savedFilesList.innerHTML = '';  // Clear existing list
-            files.forEach(file => {
-                const listItem = document.createElement('li');
-                const audioElement = document.createElement('audio');
-                audioElement.src = file.url;
-                audioElement.controls = true;
 
-                const downloadLink = document.createElement('a');
-                downloadLink.href = file.url;
-                downloadLink.textContent = file.name;
-                downloadLink.download = file.name;
+            if (files.length === 0) {
+                savedFilesList.innerHTML = '<li>No saved files found.</li>';
+            } else {
+                files.forEach(file => {
+                    const listItem = document.createElement('li');
+                    const audioElement = document.createElement('audio');
+                    audioElement.src = file.url;
+                    audioElement.controls = true;
 
-                listItem.appendChild(audioElement);
-                listItem.appendChild(downloadLink);
-                savedFilesList.appendChild(listItem);
-            });
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = file.url;
+                    downloadLink.textContent = file.name;
+                    downloadLink.download = file.name;
+
+                    listItem.appendChild(audioElement);
+                    listItem.appendChild(downloadLink);
+                    savedFilesList.appendChild(listItem);
+                });
+            }
 
             savedFilesContainer.style.display = 'block';
         })
         .catch(error => {
             console.error('Error fetching saved files:', error);
+            savedFilesContainer.style.display = 'none';
+            alert('There was an issue fetching saved files.');
         });
 });
 
