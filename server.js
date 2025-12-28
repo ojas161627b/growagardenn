@@ -5,38 +5,49 @@ const fs = require('fs');
 const app = express();
 const port = 3000;
 
-// Create an 'uploads' directory if it doesn't exist
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir);
-}
-
-// Set up multer to store the file in the 'uploads' folder
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, uploadsDir);
-    },
-    filename: function(req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname)); // Unique file name based on timestamp
-    }
+// Setup multer to save uploaded audio files
+const upload = multer({
+    dest: 'uploads/', // Files will be saved in the 'uploads' folder
+    limits: { fileSize: 50 * 1024 * 1024 }, // Max size 50MB
 });
 
-const upload = multer({ storage: storage });
-
-// Serve static files (e.g., HTML, CSS, JS)
+// Serve static files (HTML, CSS, JS)
 app.use(express.static('public'));
 
-// Route to handle the audio file upload
+// Endpoint for uploading audio files
 app.post('/upload', upload.single('audio'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
     }
-    console.log('File uploaded:', req.file);
-    res.status(200).json({ message: 'File uploaded successfully', file: req.file });
+
+    // Move the uploaded file to the desired directory
+    const filePath = path.join(__dirname, 'uploads', `${Date.now()}.mp3`);
+    fs.renameSync(req.file.path, filePath); // Rename the file to avoid collisions
+
+    // Respond with the file URL (public URL to access the file)
+    const fileUrl = `/uploads/${path.basename(filePath)}`;
+    res.status(200).json({
+        message: 'File uploaded successfully',
+        fileUrl: fileUrl,
+    });
 });
 
-// Admin route to access files (you can set permissions here)
-app.use('/admin', express.static(uploadsDir));
+// Endpoint for listing all saved files
+app.get('/list-files', (req, res) => {
+    const files = fs.readdirSync('uploads')
+        .filter(file => file.endsWith('.mp3'))
+        .map(file => {
+            return {
+                name: file,
+                url: `/uploads/${file}`,
+            };
+        });
+
+    res.json(files);
+});
+
+// Serve uploaded files as static
+app.use('/uploads', express.static('uploads'));
 
 // Start the server
 app.listen(port, () => {
