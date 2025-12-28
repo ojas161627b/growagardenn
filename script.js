@@ -1,69 +1,108 @@
-const startButton = document.getElementById("start-recording");
-const stopButton = document.getElementById("stop-recording");
-const statusText = document.getElementById("status");
-const audioPlayer = document.getElementById("audio-player");
-const downloadLink = document.getElementById("download-link");
+// Get references to HTML elements
+const startButton = document.getElementById('start-recording');
+const stopButton = document.getElementById('stop-recording');
+const audioPlayer = document.getElementById('audio-player');
+const showSavedButton = document.getElementById('show-saved-button');
+const savedFilesContainer = document.getElementById('saved-files-container');
+const savedFilesList = document.getElementById('saved-files-list');
 
+// Set up variables for recording
 let mediaRecorder;
 let audioChunks = [];
 
-startButton.addEventListener("click", async () => {
-    try {
-        // Request microphone access
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        
-        // Create media recorder
-        mediaRecorder = new MediaRecorder(stream);
+// Start recording when the "Start Recording" button is clicked
+startButton.addEventListener('click', () => {
+    startButton.style.display = 'none';
+    stopButton.style.display = 'inline-block';
+    document.getElementById('status').innerText = 'Recording...';
 
-        // Collect audio chunks
-        mediaRecorder.ondataavailable = event => {
-            audioChunks.push(event.data);
-        };
+    // Get access to the microphone
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
 
-        // Start recording
-        mediaRecorder.start();
-        statusText.textContent = "Recording...";
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
 
-        // Show stop button and hide start button
-        startButton.style.display = "none";
-        stopButton.style.display = "inline-block";
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                audioPlayer.src = audioUrl;
+                audioPlayer.style.display = 'inline-block';
 
-        stopButton.addEventListener("click", () => {
-            // Stop recording when the stop button is clicked
-            mediaRecorder.stop();
-            statusText.textContent = "Stopped recording.";
+                // Show the download link
+                const downloadLink = document.getElementById('download-link');
+                downloadLink.href = audioUrl;
+                downloadLink.download = 'recording.mp3';
+                downloadLink.style.display = 'inline-block';
 
-            // Automatically save the file after recording
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            audioPlayer.src = audioUrl;
+                // Reset for next recording
+                audioChunks = [];
+            };
 
-            // Prepare the form data to upload
-            const formData = new FormData();
-            formData.append("audio", audioBlob, "recording.wav");
-
-            // Upload the audio file to the server
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Audio uploaded successfully:', data);
-            })
-            .catch(error => {
-                console.error('Error uploading audio:', error);
-            });
-
-            // Create a download link
-            downloadLink.href = audioUrl;
-            downloadLink.download = "recording.wav";
-            downloadLink.style.display = "block";
-            downloadLink.textContent = "Download Recording";
+            mediaRecorder.start();
+        })
+        .catch(error => {
+            console.error('Error accessing microphone:', error);
+            document.getElementById('status').innerText = 'Could not access microphone.';
         });
-    } catch (error) {
-        statusText.textContent = "Microphone access denied or error occurred.";
-        console.error(error);
-    }
 });
 
+// Stop recording when the "Stop Recording" button is clicked
+stopButton.addEventListener('click', () => {
+    mediaRecorder.stop();
+    startButton.style.display = 'inline-block';
+    stopButton.style.display = 'none';
+    document.getElementById('status').innerText = 'Click "Start Recording" to begin.';
+    
+    // Upload the recording
+    uploadRecording();
+});
+
+// Upload the recorded audio to the server
+function uploadRecording() {
+    const formData = new FormData();
+    formData.append('audio', audioPlayer.src); // Send audio as form data
+
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Upload successful:', data);
+    })
+    .catch(error => {
+        console.error('Upload failed:', error);
+    });
+}
+
+// Show saved MP3 files when the "Show Saved MP3 Files" button is clicked
+showSavedButton.addEventListener('click', () => {
+    fetch('/list-files')  // Endpoint to get all saved MP3 files
+        .then(response => response.json())
+        .then(files => {
+            savedFilesList.innerHTML = '';  // Clear existing list
+            files.forEach(file => {
+                const listItem = document.createElement('li');
+                const audioElement = document.createElement('audio');
+                audioElement.src = file.url;
+                audioElement.controls = true;
+
+                const downloadLink = document.createElement('a');
+                downloadLink.href = file.url;
+                downloadLink.textContent = file.name;
+                downloadLink.download = file.name;
+
+                listItem.appendChild(audioElement);
+                listItem.appendChild(downloadLink);
+                savedFilesList.appendChild(listItem);
+            });
+
+            savedFilesContainer.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error fetching saved files:', error);
+        });
+});
