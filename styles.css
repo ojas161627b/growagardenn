@@ -1,48 +1,101 @@
+/* General body styling */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f4f4f9;
+    color: #333;
 }
 
+/* Header styling */
 header {
-    background-color: #4CAF50;
+    background-color: #007BFF;
     color: white;
-    padding: 20px;
     text-align: center;
-}
-
-section {
     padding: 20px;
-    margin: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-footer {
+/* Main section for recording */
+#microphone-access {
     text-align: center;
-    padding: 10px;
-    background-color: #333;
-    color: white;
+    margin-top: 30px;
 }
 
+/* Buttons */
 button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #4CAF50;
-    color: white;
+    background-color: #28a745;
     border: none;
-    border-radius: 5px;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    font-size: 16px;
+    margin: 10px;
     cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #218838;
 }
 
-#status {
-    margin-top: 10px;
+/* Hide elements initially */
+#stop-recording {
+    display: none;
+}
+
+#download-link {
+    display: block;
+    margin-top: 15px;
+    color: #007BFF;
+    text-decoration: none;
     font-size: 16px;
+}
+
+#download-link:hover {
+    text-decoration: underline;
+}
+
+/* Section for showing saved files */
+#saved-files-container {
+    margin-top: 30px;
+    text-align: center;
+}
+
+#saved-files-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#saved-files-list li {
+    background-color: #fff;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#saved-files-list li:hover {
+    background-color: #f1f1f1;
+}
+
+audio {
+    margin-top: 10px;
+    width: 100%;
+    max-width: 400px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Footer styling */
+footer {
+    text-align: center;
+    background-color: #007BFF;
+    color: white;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
 }
 
