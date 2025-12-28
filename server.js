@@ -24,32 +24,29 @@ app.post('/upload', upload.single('audio'), (req, res) => {
     const filePath = path.join(__dirname, 'uploads', `${Date.now()}.mp3`);
     fs.renameSync(req.file.path, filePath); // Rename the file to avoid collisions
 
-    // Respond with the file URL (public URL to access the file)
-    const fileUrl = `/uploads/${path.basename(filePath)}`;
-    res.status(200).json({
-        message: 'File uploaded successfully',
-        fileUrl: fileUrl,
+    // Respond with the file URL (publicly accessible)
+    res.json({ url: `/uploads/${path.basename(filePath)}`, name: path.basename(filePath) });
+});
+
+// Endpoint to list saved files
+app.get('/list-files', (req, res) => {
+    fs.readdir('uploads', (err, files) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error reading file directory' });
+        }
+        const fileList = files.map(file => ({
+            name: file,
+            url: `/uploads/${file}`,
+        }));
+        res.json(fileList);
     });
 });
 
-// Endpoint for listing all saved files
-app.get('/list-files', (req, res) => {
-    const files = fs.readdirSync('uploads')
-        .filter(file => file.endsWith('.mp3'))
-        .map(file => {
-            return {
-                name: file,
-                url: `/uploads/${file}`,
-            };
-        });
-
-    res.json(files);
-});
-
-// Serve uploaded files as static
+// Serve uploaded files
 app.use('/uploads', express.static('uploads'));
 
 // Start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
